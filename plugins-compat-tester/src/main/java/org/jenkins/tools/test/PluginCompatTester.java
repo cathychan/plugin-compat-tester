@@ -590,11 +590,13 @@ public class PluginCompatTester {
         ScmRepository repository;
         ScmManager scmManager = SCMManagerFactory.getInstance().createScmManager();
         for (String connectionURL: connectionURLs){
-            System.out.println("Checking out from SCM connection URL : " + connectionURL + " (" + name + "-" + version + ") at tag " + scmTag);
+            // scm:git:git:// is being deprecated (https://github.blog/2021-09-01-improving-git-protocol-security-github/)
+            String httpsConnectionURL = connectionURL != null ? connectionURL.replace("scm:git:git://", "scm:git:https://") : null;
+            System.out.println("Checking out from SCM connection URL : " + httpsConnectionURL + " (" + name + "-" + version + ") at tag " + scmTag);
             if (checkoutDirectory.isDirectory()) {
                 FileUtils.deleteDirectory(checkoutDirectory);
             }
-            repository = scmManager.makeScmRepository(connectionURL);
+            repository = scmManager.makeScmRepository(httpsConnectionURL);
             CheckOutScmResult result = scmManager.checkOut(repository, new ScmFileSet(checkoutDirectory), new ScmTag(scmTag));
             if(result.isSuccess()){
                 repositoryCloned = true;
